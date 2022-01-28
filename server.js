@@ -24,6 +24,7 @@ async function run() {
         await client.connect();
         const database = client.db("loveToTravel");
         const tours_Collection = database.collection("tours");
+        const destinations_Collection = database.collection("destinations");
         const orders_Collection = database.collection("orders");
 
         // load tours get api
@@ -31,6 +32,13 @@ async function run() {
             const cursor = tours_Collection.find({});
             const tours = await cursor.toArray();
             res.json(tours);
+        });
+
+        // load destinations get api
+        app.get('/destinations', async (req, res) => {
+            const cursor = destinations_Collection.find({});
+            const destinations = await cursor.toArray();
+            res.json(destinations);
         });
 
         // load single tour get api
@@ -47,7 +55,7 @@ async function run() {
             const query = { uid: uid };
             const result = await orders_Collection.find(query).toArray();
             res.json(result);
-        })
+        });
 
         // add data to cart collection with additional info
         app.post('/tour/add', async (req, res) => {
@@ -62,7 +70,15 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await orders_Collection.deleteOne(query);
             res.json(result);
-        })
+        });
+
+        // purchase delete api
+        app.delete(`/booking/:uid`, async (req, res) => {
+            const uid = req.params.uid;
+            const query = { uid: uid };
+            const result = await orders_Collection.deleteMany(query);
+            res.json(result);
+        });
     } finally {
         // await client.close();
     }
